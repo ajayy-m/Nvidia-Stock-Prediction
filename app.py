@@ -1,33 +1,26 @@
+# Run using Streamlit run app.py
 import streamlit as st
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from datetime import datetime, timedelta
-from streamlit_autorefresh import st_autorefresh
-
 st.set_page_config(layout="wide")
 
+# --- Imports ---
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.graph_objs as go
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
 
-# Sidebar for refresh interval
+# --- Sidebar ---
 refresh_interval = st.sidebar.slider("⏱️ Auto-Refresh Interval (sec)", 10, 300, 60)
 st_autorefresh(interval=refresh_interval * 1000, key="refresh")
 
-# Title and caption
+# --- Title ---
 st.title("🔮 NVIDIA Stock Price Prediction (Live)")
 st.caption("Using Linear Regression on real-time data from Yahoo Finance")
 
-# --- Data fetching ---
+# --- Data Fetching ---
 def fetch_data():
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365 * 2)
@@ -38,7 +31,7 @@ def fetch_data():
     df.dropna(inplace=True)
     return df
 
-# --- ML training ---
+# --- Model Training ---
 def train_and_predict(df):
     features = ['Close', 'SMA_10', 'SMA_30']
     X = df[features]
@@ -50,30 +43,40 @@ def train_and_predict(df):
     model = LinearRegression()
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
+
     return df.index[split_index:], y_test, y_pred
 
-# --- Main execution ---
+# --- Main Execution ---
 df = fetch_data()
 dates, actual, predicted = train_and_predict(df)
 
+# --- Latest Table ---
 st.subheader("📊 Latest NVIDIA Data")
-st.write(df.tail(5))
+st.dataframe(df.tail(5), use_container_width=True)
 
-# --- Plotting ---
-fig, ax = plt.subplots(figsize=(14, 6))
-ax.plot(dates, actual, label='Actual Price')
-ax.plot(dates, predicted, label='Predicted Price')
-ax.set_title('NVIDIA Stock Price Prediction (Linear Regression)')
-ax.set_xlabel('Date')
-ax.set_ylabel('Price (USD)')
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
+# --- Live Plot using Plotly ---
+st.subheader("📈 Price Prediction Chart (Live)")
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=dates, y=actual, mode='lines', name='Actual'))
+fig.add_trace(go.Scatter(x=dates, y=predicted, mode='lines', name='Predicted'))
 
-# --- Metrics ---
-r2 = r2_score(actual, predicted)
-rmse = np.sqrt(mean_squared_error(actual, predicted))
-st.metric("R² Score", f"{r2:.4f}")
-st.metric("RMSE", f"{rmse:.2f}")
+fig.update_layout(
+    title="NVIDIA Stock Price Prediction (Live)",
+    xaxis_title="Date",
+    yaxis_title="Price (USD)",
+    template="plotly_dark",
+    height=500
+)
 
-# To run the File, Streamlit run app.py
+st.plotly_chart(fig, use_container_width=True)
+
+# --- Live Price Metric ---
+latest = df['Close'].iloc[-1].item()
+prev = df['Close'].iloc[-6].item()  # Approx. 5 intervals ago
+delta = latest - prev
+delta_pct = (delta / prev) * 100
+
+col1, col2, col3 = st.columns(3)
+col1.metric("📈 Live Price", f"${latest:.2f}", delta=f"{delta_pct:.2f}%")
+col2.metric("📊 R² Score", f"{r2_score(actual, predicted):.4f}")
+col3.metric("📉 RMSE", f"{np.sqrt(mean_squared_error(actual, predicted)):.2f}")
