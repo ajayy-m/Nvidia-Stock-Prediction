@@ -8,9 +8,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
 
-import streamlit as st
-
-# ✅ Must be first Streamlit command
 st.set_page_config(layout="wide")
 
 import yfinance as yf
@@ -78,3 +75,5 @@ r2 = r2_score(actual, predicted)
 rmse = np.sqrt(mean_squared_error(actual, predicted))
 st.metric("R² Score", f"{r2:.4f}")
 st.metric("RMSE", f"{rmse:.2f}")
+
+# To run the File, Streamlit run app.py
