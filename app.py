@@ -77,7 +77,7 @@ fig.update_layout(
     title="NVIDIA Stock Price Prediction (Animated)",
     xaxis_title="Date",
     yaxis_title="Price (USD)",
-    template="plotly_dark",
+    template="plotly_white",
     height=500,
     transition=dict(duration=500, easing='cubic-in-out'),
     uirevision='static'
