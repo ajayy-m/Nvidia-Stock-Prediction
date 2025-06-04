@@ -1,4 +1,4 @@
-# Run using Streamlit run app.py
+# Run using: streamlit run app.py
 import streamlit as st
 st.set_page_config(layout="wide")
 
@@ -13,11 +13,11 @@ from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
 
 # --- Sidebar ---
-refresh_interval = st.sidebar.slider("⏱️ Auto-Refresh Interval (sec)", 10, 300, 60)
+refresh_interval = st.sidebar.slider("Auto-Refresh Interval (sec)", 10, 300, 60)
 st_autorefresh(interval=refresh_interval * 1000, key="refresh")
 
 # --- Title ---
-st.title("🔮 NVIDIA Stock Price Prediction (Live)")
+st.title("NVIDIA Stock Price Prediction (Live)")
 st.caption("Using Linear Regression on real-time data from Yahoo Finance")
 
 # --- Data Fetching ---
@@ -51,21 +51,36 @@ df = fetch_data()
 dates, actual, predicted = train_and_predict(df)
 
 # --- Latest Table ---
-st.subheader("📊 Latest NVIDIA Data")
+st.subheader("Latest NVIDIA Data")
 st.dataframe(df.tail(5), use_container_width=True)
 
-# --- Live Plot using Plotly ---
-st.subheader("📈 Price Prediction Chart (Live)")
+# --- Live Animated Plot using Plotly ---
+st.subheader("Price Prediction Chart (Animated Live)")
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=dates, y=actual, mode='lines', name='Actual'))
-fig.add_trace(go.Scatter(x=dates, y=predicted, mode='lines', name='Predicted'))
+
+fig.add_trace(go.Scatter(
+    x=dates,
+    y=actual,
+    mode='lines+markers',
+    name='Actual',
+    line=dict(color='cyan')
+))
+fig.add_trace(go.Scatter(
+    x=dates,
+    y=predicted,
+    mode='lines+markers',
+    name='Predicted',
+    line=dict(color='orange')
+))
 
 fig.update_layout(
-    title="NVIDIA Stock Price Prediction (Live)",
+    title="NVIDIA Stock Price Prediction (Animated)",
     xaxis_title="Date",
     yaxis_title="Price (USD)",
     template="plotly_dark",
-    height=500
+    height=500,
+    transition=dict(duration=500, easing='cubic-in-out'),
+    uirevision='static'
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -76,7 +91,7 @@ prev = df['Close'].iloc[-6].item()  # Approx. 5 intervals ago
 delta = latest - prev
 delta_pct = (delta / prev) * 100
 
-col1, col2, col3 = st.columns(3)
-col1.metric("📈 Live Price", f"${latest:.2f}", delta=f"{delta_pct:.2f}%")
-col2.metric("📊 R² Score", f"{r2_score(actual, predicted):.4f}")
-col3.metric("📉 RMSE", f"{np.sqrt(mean_squared_error(actual, predicted)):.2f}")
+col1, col2, col3 = st.columns(3) 
+col1.metric("Live Price", f"${latest:.2f}", delta=f"{delta_pct:.2f}%")
+col2.metric(" Score", f"{r2_score(actual, predicted):.4f}")
+col3.metric(" RMSE", f"{np.sqrt(mean_squared_error(actual, predicted)):.2f}")
