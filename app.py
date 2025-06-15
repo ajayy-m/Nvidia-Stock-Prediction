@@ -17,7 +17,7 @@ refresh_interval = st.sidebar.slider("Auto-Refresh Interval (sec)", 10, 300, 60)
 st_autorefresh(interval=refresh_interval * 1000, key="refresh")
 
 # --- Title ---
-st.title("NVIDIA Stock Price Prediction (Live)")
+st.title("NVIDIA Stock Price Prediction ")
 st.caption("Using Linear Regression on real-time data from Yahoo Finance")
 
 # --- Data Fetching ---
