@@ -55,7 +55,6 @@ st.subheader("Latest NVIDIA Data")
 st.dataframe(df.tail(5), use_container_width=True)
 
 # --- Live Animated Plot using Plotly ---
-st.subheader("Price Prediction Chart (Animated Live)")
 fig = go.Figure()
 
 fig.add_trace(go.Scatter(
