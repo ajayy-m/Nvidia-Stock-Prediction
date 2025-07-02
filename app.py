@@ -73,7 +73,7 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title="NVIDIA Stock Price Prediction (Animated)",
+    title="NVIDIA Stock Price Prediction ",
     xaxis_title="Date",
     yaxis_title="Price (USD)",
     template="plotly_white",
